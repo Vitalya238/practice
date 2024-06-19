@@ -1,16 +1,56 @@
 const Meetup = require('../database/meetup_model');
+const { Op } = require('sequelize');
 
 class meetupController {
 
     async getAllMeetup(req, res) {
         try {
-            const meetup = await Meetup.findAll();
-            res.json(meetup);
+          const { search, sort, order, page = 1, limit = 3, startDate, endDate } = req.query;
+          
+          let where = {};
+          if (search) {
+            where.title = { [Op.like]: `%${search}%` };
+          }
+    
+          if (startDate && endDate) {
+            where.event_time = {
+              [Op.between]: [new Date(startDate), new Date(endDate)]
+            };
+          } else if (startDate) {
+            where.event_time = {
+              [Op.gte]: new Date(startDate)
+            };
+          } else if (endDate) {
+            where.event_time = {
+              [Op.lte]: new Date(endDate)
+            };
+          }
+    
+          let orderOption = [];
+          if (sort) {
+            orderOption = [[sort, order || 'ASC']];
+          }
+    
+          const offset = (page - 1) * limit;
+    
+          const { count, rows } = await Meetup.findAndCountAll({
+            where,
+            order: orderOption,
+            limit: parseInt(limit),
+            offset
+          });
+    
+          res.json({
+            totalItems: count,
+            totalPages: Math.ceil(count / limit),
+            currentPage: parseInt(page),
+            data: rows
+          });
         } catch (error) {
-            console.error('Error fetching meetups:', error);
-            res.status(500).json({ error: 'Error' });
+          console.error('Error fetching meetups:', error);
+          res.status(500).json({ error: 'Error' });
         }
-    }
+      }
 
     async getOneMeetup(req, res) {
         try {
@@ -117,7 +157,7 @@ class meetupController {
                     },
                 });
                 return res.status(200).end(JSON.stringify(meetup, null, 4));
-            } else res.status(404).send('[ERROR] 404: There is no repo with such id.');
+            } else res.status(404).send('[ERROR] 404: There is no meetup with such id.');
         } catch (err) {
             console.log(err);
             res.status(403).send('[ERROR]');
