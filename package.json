@@ -1,0 +1,16 @@
+{
+  "name": "practice_2024",
+  "version": "1.0.0",
+  "description": "1. Получение списка всех митапов; 2. Получение определённого митапа по его Id; 3. Регистрация нового митапа; 4. Изменение информации о существующем митапе; 5. Удаление митапа.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.12.0",
+    "sequelize": "^6.37.3"
+  }
+}
