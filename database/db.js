@@ -1,30 +1,18 @@
-const { Sequelize, DataTypes } = require('sequelize');
-
-const path = require('path');
-
+require('dotenv').config();
+const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize({
-  dialect: 'postgres',
-  database: 'vitalya',
-  username: 'vitalya',
-  password: '7117',
-  host: 'localhost',
-  port:5432,
+  dialect: process.env.DB_DIALECT,
+  database: process.env.DB_DATABASE,
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
 });
 
 module.exports = sequelize;
 
 
-async function testConnection() {
-  try {
-    await sequelize.authenticate();
-    console.log('Connection has been established successfully.');
-  } catch (error) {
-    console.error('Unable to connect to the database:', error);
-  }
-}
-
-testConnection();
 
 
 

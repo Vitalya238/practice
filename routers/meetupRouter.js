@@ -20,7 +20,6 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-
 router.post('/', async (req, res) => {
     try {
         await meetupController.createMeetup(req, res);

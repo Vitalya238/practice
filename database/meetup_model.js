@@ -1,11 +1,10 @@
-const { DataTypes, Sequelize } = require('sequelize');
-const sequelize = require('./db'); 
+const DataTypes = require('sequelize');
+const sequelize = require('./db');
 
 const Meetup = sequelize.define('meetups', {
   meetup_id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true
   },
   title: {
     type: DataTypes.STRING,

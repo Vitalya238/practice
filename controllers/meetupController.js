@@ -1,14 +1,11 @@
 const Meetup = require('../database/meetup_model');
 
 class meetupController {
-    static test() {
-        return "Hello World";
-    }
 
     async getAllMeetup(req, res) {
         try {
             const meetup = await Meetup.findAll();
-            res.json(meetup); 
+            res.json(meetup);
         } catch (error) {
             console.error('Error fetching meetups:', error);
             res.status(500).json({ error: 'Error' });
@@ -22,7 +19,6 @@ class meetupController {
                     meetup_id: req.params.id
                 },
             });
-
             if (meetup) {
                 return res.status(200).end(JSON.stringify(meetup, null, 4));
             } else {
@@ -63,9 +59,6 @@ class meetupController {
 
     async updateMeetup(req, res) {
         try {
-            console.log('Request Params ID:', req.params.id);
-            console.log('Request Body:', req.body);
-
             const meetup = await Meetup.findOne({
                 where: { meetup_id: req.params.id }
             });
