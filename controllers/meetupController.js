@@ -1,4 +1,4 @@
-const Meetup = require('../database/meetup_model');
+const Meetup = require('../database/meetupModel');
 const { Op } = require('sequelize');
 
 class meetupController {
