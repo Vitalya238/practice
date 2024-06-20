@@ -1,5 +1,4 @@
 .DS_Store
 .env
 node_modules
-remaining_tasks.txt
 meetups.postman_collection.json
