@@ -2,9 +2,14 @@ const express = require('express');
 const app = express();
 const meetupRouter = require('./routers/meetupRouter');
 const errorHandler = require('./middleware/errorHandler');
+const swaggerUI = require('swagger-ui-express');
+const swaggerDocument = require('./swagger');
 
 app.use(express.json()); 
+
+app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 app.use('/meetups', meetupRouter);
+
 
 app.use(errorHandler);
 
