@@ -6,4 +6,6 @@ const generateRandomString = (length) => {
 
 const jwtSecret = generateRandomString(32); 
 
+console.log(`${jwtSecret}`);
+
 module.exports = jwtSecret;

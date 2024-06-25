@@ -19,6 +19,11 @@ const User = sequelize.define('users', {
   role: {
     type: DataTypes.STRING,
     defaultValue: 'user'
+  },
+  refresh_token: {
+    type: DataTypes.STRING,
+    defaultValue: '',
+    allowNull: true
   }
 },
 {

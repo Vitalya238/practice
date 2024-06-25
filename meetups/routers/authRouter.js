@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/userModel');
 const jwtSecret = process.env.JWT_SECRET;
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
 
 router.post('/register', async (req, res, next) => {
   try {
@@ -16,9 +17,16 @@ router.post('/register', async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({ username, password: hashedPassword, role });
+    const token = jwt.sign({ sub: username }, jwtSecret, { expiresIn: '1h' });
 
-    const token = jwt.sign({ sub: user.id }, jwtSecret, { expiresIn: '1h' });
+    const refreshToken = jwt.sign({ sub: username }, refreshTokenSecret, { expiresIn: '7d' });
+
+    const user = await User.create({ 
+      username, 
+      password: hashedPassword, 
+      role, 
+      refresh_token: refreshToken 
+    });
 
     res.cookie('access-token', token, {
       httpOnly: true,
@@ -34,9 +42,9 @@ router.post('/register', async (req, res, next) => {
   }
 });
 
-
 router.post('/login', async (req, res, next) => {
   try {
+    const { username, password } = req.body;
 
     const token = req.cookies['access-token'];
     let decoded;
@@ -57,8 +65,6 @@ router.post('/login', async (req, res, next) => {
       }
     }
 
-    const { username, password } = req.body;
-
     const user = await User.findOne({ where: { username } });
     if (!user) {
       return res.status(400).json({ message: 'Invalid username or password' });
@@ -69,24 +75,27 @@ router.post('/login', async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid username or password' });
     }
 
-    if (isMatch && user) {
+    const newToken = jwt.sign({ sub: user.id }, jwtSecret, { expiresIn: '1h' });
 
-      const newToken = jwt.sign({ sub: user.id }, jwtSecret, { expiresIn: '1h' });
-      
+    const newRefreshToken = jwt.sign({ sub: user.id }, refreshTokenSecret, { expiresIn: '7d' });
 
-      res.cookie('access-token', newToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Strict',
-        maxAge: 360000
-      });
+    user.refresh_token = newRefreshToken;
+    await user.save();
 
-      res.status(200).json({ message: 'Login successful' });
-    }
+    res.cookie('access-token', newToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      maxAge: 3600000 
+    });
+
+    res.status(200).json({ message: 'Login successful' });
   } catch (error) {
     console.error('Error during login:', error);
     next(error);
   }
 });
+
+
 
 module.exports = router;

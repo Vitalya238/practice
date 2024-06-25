@@ -2,7 +2,7 @@ const passport = require('passport');
 const { Strategy: JwtStrategy } = require('passport-jwt');
 const User = require('./models/userModel');
 const jwtSecret = process.env.JWT_SECRET;
-
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
 
 const cookieExtractor = req => {
   let jwt = null 
