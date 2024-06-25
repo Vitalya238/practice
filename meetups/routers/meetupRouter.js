@@ -9,5 +9,6 @@ router.get('/:id', meetupController.getOneMeetup);
 router.post('/', validateRequest(createMeetupSchema), meetupController.createMeetup);
 router.put('/:id', validateRequest(updateMeetupSchema), meetupController.updateMeetup);
 router.delete('/:id', meetupController.deleteMeetup);
+router.post('/subscribe', meetupController.subscribeToMeetup);
 
 module.exports = router;

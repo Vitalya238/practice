@@ -1,56 +1,59 @@
 const Meetup = require('../models/meetupModel');
+const UserMeetup = require('../models/userMeetupsModel');
+const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
+const jwtSecret = process.env.JWT_SECRET;
 
 class meetupController {
 
     async getAllMeetup(req, res) {
         try {
-          const { search, sort, order, page = 1, limit = 3, startDate, endDate } = req.query;
-          
-          let where = {};
-          if (search) {
-            where.title = { [Op.like]: `%${search}%` };
-          }
-    
-          if (startDate && endDate) {
-            where.event_time = {
-              [Op.between]: [new Date(startDate), new Date(endDate)]
-            };
-          } else if (startDate) {
-            where.event_time = {
-              [Op.gte]: new Date(startDate)
-            };
-          } else if (endDate) {
-            where.event_time = {
-              [Op.lte]: new Date(endDate)
-            };
-          }
-    
-          let orderOption = [];
-          if (sort) {
-            orderOption = [[sort, order || 'ASC']];
-          }
-    
-          const offset = (page - 1) * limit;
-    
-          const { count, rows } = await Meetup.findAndCountAll({
-            where,
-            order: orderOption,
-            limit: parseInt(limit),
-            offset
-          });
-    
-          res.json({
-            totalItems: count,
-            totalPages: Math.ceil(count / limit),
-            currentPage: parseInt(page),
-            data: rows
-          });
+            const { search, sort, order, page = 1, limit = 3, startDate, endDate } = req.query;
+
+            let where = {};
+            if (search) {
+                where.title = { [Op.like]: `%${search}%` };
+            }
+
+            if (startDate && endDate) {
+                where.event_time = {
+                    [Op.between]: [new Date(startDate), new Date(endDate)]
+                };
+            } else if (startDate) {
+                where.event_time = {
+                    [Op.gte]: new Date(startDate)
+                };
+            } else if (endDate) {
+                where.event_time = {
+                    [Op.lte]: new Date(endDate)
+                };
+            }
+
+            let orderOption = [];
+            if (sort) {
+                orderOption = [[sort, order || 'ASC']];
+            }
+
+            const offset = (page - 1) * limit;
+
+            const { count, rows } = await Meetup.findAndCountAll({
+                where,
+                order: orderOption,
+                limit: parseInt(limit),
+                offset
+            });
+
+            res.json({
+                totalItems: count,
+                totalPages: Math.ceil(count / limit),
+                currentPage: parseInt(page),
+                data: rows
+            });
         } catch (error) {
-          console.error('Error fetching meetups:', error);
-          res.status(500).json({ error: 'Error' });
+            console.error('Error fetching meetups:', error);
+            res.status(500).json({ error: 'Error' });
         }
-      }
+    }
 
     async getOneMeetup(req, res) {
         try {
@@ -163,6 +166,49 @@ class meetupController {
             res.status(403).send('[ERROR]');
         }
     }
+
+    async subscribeToMeetup(req, res) {
+        try {
+
+            console.log(`cookies: ${req.cookies}`);
+            console.log(`cookies: ${req.cookies["access-token"]}`);
+
+            const token = req.cookies["access-token"];
+            if (!token) {
+                return res.status(401).json({ message: 'Unauthorized' });
+            }
+
+            let decoded;
+            try {
+                decoded = jwt.verify(token, jwtSecret);
+            } catch (err) {
+                console.error('Failed to verify token:', err);
+                return res.status(403).json({ message: 'Invalid token' });
+            }
+
+            const userMeetupExist = await UserMeetup.findOne(
+                {
+                    where: {
+                        userid: decoded.sub,
+                        meetupid: req.body.meetupid
+                    }
+                }
+            );
+            if(userMeetupExist) {
+                return res.status(409).send('[ERROR] 409: userMeetup already exists.');
+            }
+            const userMeetup = await UserMeetup.create({
+                userid: decoded.sub,
+                meetupid: req.body.meetupid
+            });
+
+            return res.status(201).end(JSON.stringify(userMeetup, null, 4));
+        } catch (err) {
+            console.log(err);
+            res.status(403).send('[ERROR]' + err);
+        }
+    }
+
 }
 
 module.exports = new meetupController();

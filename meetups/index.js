@@ -11,10 +11,10 @@ const cookieParser = require('cookie-parser');
 
 app.use(express.json()); 
 
+app.use(cookieParser());
 app.use('/swagger', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 app.use('/meetups', meetupRouter);
 
-app.use(cookieParser());
 app.use(passport.initialize());
 app.use('/auth', authRouter);
 

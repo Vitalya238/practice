@@ -21,11 +21,11 @@ router.post('/register', async (req, res, next) => {
 
     const refreshToken = jwt.sign({ sub: username }, refreshTokenSecret, { expiresIn: '7d' });
 
-    const user = await User.create({ 
-      username, 
-      password: hashedPassword, 
-      role, 
-      refresh_token: refreshToken 
+    const user = await User.create({
+      username,
+      password: hashedPassword,
+      role,
+      refresh_token: refreshToken
     });
 
     res.cookie('access-token', token, {
@@ -35,6 +35,7 @@ router.post('/register', async (req, res, next) => {
       maxAge: 3600000
     });
 
+    console.log(`cookies ${req.cookies["access-token"]}`);
     res.status(201).json({ message: 'User registered successfully', user });
   } catch (error) {
     console.error('Error creating user:', error);
@@ -57,6 +58,7 @@ router.post('/login', async (req, res, next) => {
         res.clearCookie('access-token');
       }
     }
+    console.log(`cookies ${req.cookies["access-token"]}`);
 
     if (decoded) {
       const user = await User.findOne({ where: { id: decoded.sub } });
@@ -86,8 +88,9 @@ router.post('/login', async (req, res, next) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'Strict',
-      maxAge: 3600000 
+      maxAge: 3600000
     });
+
 
     res.status(200).json({ message: 'Login successful' });
   } catch (error) {
