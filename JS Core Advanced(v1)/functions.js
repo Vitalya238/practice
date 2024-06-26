@@ -14,7 +14,7 @@ function sayHello() {
 
 const intervalId = repeatOperation(sayHello, 1000);
 
-setTimeout(function() {
+setTimeout(function () {
     clearInterval(intervalId);
     console.log('stop');
 }, 5000);

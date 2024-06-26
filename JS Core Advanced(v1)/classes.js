@@ -13,7 +13,7 @@ class Manager extends Employee {
     constructor(name, salary, department, bonus) {
         super(name, salary);
         this.department = department;
-        this.bonus = bonus; 
+        this.bonus = bonus;
     }
 
     getAnnualSalary() {

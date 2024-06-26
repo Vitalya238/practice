@@ -16,11 +16,11 @@ function factorial(n) {
         result *= i;
     }
     return result;
-    
+
 }
 
-console.log(factorial("asd")); 
-console.log(factorial(0)); 
-console.log(factorial(-20)); 
-console.log(factorial(3)); 
+console.log(factorial("asd"));
+console.log(factorial(0));
+console.log(factorial(-20));
+console.log(factorial(3));
 console.log(factorial(20)); 

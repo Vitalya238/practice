@@ -13,9 +13,9 @@ function test() {
 
   console.log('function scope:');
   try {
-  console.log('xVar:', xVar);
+    console.log('xVar:', xVar);
   }
-  catch(e) {
+  catch (e) {
     console.log(e.message);
   }
   try {
