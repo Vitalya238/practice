@@ -169,10 +169,6 @@ class meetupController {
 
     async subscribeToMeetup(req, res) {
         try {
-
-            console.log(`cookies: ${req.cookies}`);
-            console.log(`cookies: ${req.cookies["access-token"]}`);
-
             const token = req.cookies["access-token"];
             if (!token) {
                 return res.status(401).json({ message: 'Unauthorized' });

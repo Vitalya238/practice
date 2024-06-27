@@ -8,8 +8,6 @@ const validateRequest = require('../middleware/validateRequest');
 
 async function checkOrganizer(req, res, next) {
     const token = req.cookies["access-token"];
-    console.log(`access-token: ${req.cookies["access-token"]}`);
-    console.log(`cookie: ${req.cookies}`);
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized' });
     }

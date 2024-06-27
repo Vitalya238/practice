@@ -1,5 +1,19 @@
 let openapi = {
     openapi: '3.0.1',
+    components: {
+        securitySchemes: {
+            cookieAuth: {
+                type: 'apiKey',
+                in: 'cookie',
+                name: 'access-token'
+            }
+        }
+    },
+    security: [
+        {
+            cookieAuth: []
+        }
+    ],
     paths: {
         '/meetups': {
             get: {
@@ -313,6 +327,188 @@ let openapi = {
                                 },
                                 example: {
                                     message: 'Meetup not found'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        '/auth/register': {
+            post: {
+                tags: ['Auth'],
+                summary: 'Register a new user',
+                operationId: 'registerUser',
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    username: { type: 'string' },
+                                    password: { type: 'string' },
+                                    role: { type: 'string' }
+                                },
+                                required: ['username', 'password', 'role'],
+                                example: {
+                                    username: 'org2',
+                                    password: '123',
+                                    role: 'organizer'
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    '201': {
+                        description: 'User registered successfully',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string' },
+                                        user: {
+                                            type: 'object',
+                                            properties: {
+                                                username: { type: 'string' },
+                                                role: { type: 'string' },
+                                                refresh_token: { type: 'string' }
+                                            }
+                                        }
+                                    }
+                                },
+                                example: {
+                                    message: 'User registered successfully',
+                                    user: {
+                                        username: 'newuser',
+                                        role: 'user',
+                                        refresh_token: 'example_refresh_token'
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    '400': {
+                        description: 'Username already exists',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string' }
+                                    }
+                                },
+                                example: {
+                                    message: 'Username already exists'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        '/auth/login': {
+            post: {
+                tags: ['Auth'],
+                summary: 'Login a user',
+                operationId: 'loginUser',
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    username: { type: 'string' },
+                                    password: { type: 'string' }
+                                },
+                                required: ['username', 'password'],
+                                example: {
+                                    username: 'org2',
+                                    password: '123'
+                                }
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    '200': {
+                        description: 'Login successful',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string' }
+                                    }
+                                },
+                                example: {
+                                    message: 'Login successful'
+                                }
+                            }
+                        }
+                    },
+                    '400': {
+                        description: 'Invalid username or password',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string' }
+                                    }
+                                },
+                                example: {
+                                    message: 'Invalid username or password'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        '/auth/logout': {
+            post: {
+                tags: ['Auth'],
+                summary: 'Logout',
+                operationId: 'logout',
+                responses: {
+                    '200': {
+                        description: 'Logout successful',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { 
+                                            type: 'string',
+                                            example: 'Logout successful'
+                                         }
+                                    }
+                                },
+                                example: {
+                                    message: 'Login successful'
+                                }
+                            }
+                        }
+                    },
+                    '500': {
+                        description: 'Internal Server Error',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { 
+                                            type: 'string' ,
+                                            example: 'Error during logout'
+                                        }
+                                    }
+                                },
+                                example: {
+                                    message: 'Invalid username or password'
                                 }
                             }
                         }

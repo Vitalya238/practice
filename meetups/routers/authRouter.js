@@ -17,25 +17,23 @@ router.post('/register', async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const token = jwt.sign({ sub: username }, jwtSecret, { expiresIn: '1h' });
-
-    const refreshToken = jwt.sign({ sub: username }, refreshTokenSecret, { expiresIn: '7d' });
-
     const user = await User.create({
       username,
       password: hashedPassword,
-      role,
-      refresh_token: refreshToken
+      role
     });
 
+    const token = jwt.sign({ sub: user.id }, jwtSecret, { expiresIn: '1h' });
+
+    const refreshToken = jwt.sign({ sub: user.id }, refreshTokenSecret, { expiresIn: '7d' });
+
+    user.refresh_token = refreshToken;
+    await user.save();
+
     res.cookie('access-token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
       maxAge: 3600000
     });
 
-    console.log(`cookies ${req.cookies["access-token"]}`);
     res.status(201).json({ message: 'User registered successfully', user });
   } catch (error) {
     console.error('Error creating user:', error);
@@ -58,8 +56,6 @@ router.post('/login', async (req, res, next) => {
         res.clearCookie('access-token');
       }
     }
-    console.log(`cookies ${req.cookies["access-token"]}`);
-
     if (decoded) {
       const user = await User.findOne({ where: { id: decoded.sub } });
       if (user) {
@@ -85,12 +81,8 @@ router.post('/login', async (req, res, next) => {
     await user.save();
 
     res.cookie('access-token', newToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
       maxAge: 3600000
     });
-
 
     res.status(200).json({ message: 'Login successful' });
   } catch (error) {
@@ -98,6 +90,18 @@ router.post('/login', async (req, res, next) => {
     next(error);
   }
 });
+
+router.post('/logout', async (req, res, next) => {
+  try {
+    res.clearCookie('access-token');
+    res.status(200).json({ message: 'Logout successful' });
+
+  } catch (error) {
+    console.error('Error during logout:', error);
+    next(error);
+  }
+});
+
 
 
 
