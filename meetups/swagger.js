@@ -33,13 +33,13 @@ let openapi = {
                                             id: { type: 'string' },
                                             title: { type: 'string' },
                                             description: { type: 'string' },
-                                            tags: { 
+                                            tags: {
                                                 type: 'array',
                                                 items: { type: 'string' }
                                             },
-                                            event_time: { 
+                                            event_time: {
                                                 type: 'string',
-                                                format: 'date-time' 
+                                                format: 'date-time'
                                             },
                                             location: { type: 'string' }
                                         }
@@ -74,13 +74,13 @@ let openapi = {
                                     id: { type: 'string' },
                                     title: { type: 'string' },
                                     description: { type: 'string' },
-                                    tags: { 
+                                    tags: {
                                         type: 'array',
                                         items: { type: 'string' }
                                     },
-                                    event_time: { 
+                                    event_time: {
                                         type: 'string',
-                                        format: 'date-time' 
+                                        format: 'date-time'
                                     },
                                     location: { type: 'string' }
                                 },
@@ -160,13 +160,13 @@ let openapi = {
                                         id: { type: 'string' },
                                         title: { type: 'string' },
                                         description: { type: 'string' },
-                                        tags: { 
+                                        tags: {
                                             type: 'array',
                                             items: { type: 'string' }
                                         },
-                                        event_time: { 
+                                        event_time: {
                                             type: 'string',
-                                            format: 'date-time' 
+                                            format: 'date-time'
                                         },
                                         location: { type: 'string' }
                                     }
@@ -224,13 +224,13 @@ let openapi = {
                                 properties: {
                                     title: { type: 'string' },
                                     description: { type: 'string' },
-                                    tags: { 
+                                    tags: {
                                         type: 'array',
                                         items: { type: 'string' }
                                     },
-                                    event_time: { 
+                                    event_time: {
                                         type: 'string',
-                                        format: 'date-time' 
+                                        format: 'date-time'
                                     },
                                     location: { type: 'string' }
                                 }
@@ -409,6 +409,121 @@ let openapi = {
                 }
             }
         },
+        '/meetups/subscribe': {
+            post: {
+                tags: ['Meetups'],
+                summary: 'Subscribe to a meetup',
+                operationId: 'subscribeToMeetup',
+                security: [
+                    {
+                        cookieAuth: []
+                    }
+                ],
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    meetupid: {
+                                        type: 'string'
+                                    }
+                                },
+                                required: ['meetupid']
+                            },
+                            example: {
+                                meetupid: '1'
+                            }
+                        }
+                    }
+                },
+                responses: {
+                    '201': {
+                        description: 'Meetup subscription successful',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        userid: { type: 'string' },
+                                        meetupid: { type: 'string' }
+                                    },
+                                    example: {
+                                        userid: 'user_id_example',
+                                        meetupid: 'meetup_id_example'
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    '401': {
+                        description: 'Unauthorized',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string' }
+                                    }
+                                },
+                                example: {
+                                    message: 'Unauthorized'
+                                }
+                            }
+                        }
+                    },
+                    '403': {
+                        description: 'Invalid token',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string' }
+                                    }
+                                },
+                                example: {
+                                    message: 'Invalid token'
+                                }
+                            }
+                        }
+                    },
+                    '409': {
+                        description: 'User already subscribed to the meetup',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string' }
+                                    }
+                                },
+                                example: {
+                                    message: '[ERROR] 409: userMeetup already exists.'
+                                }
+                            }
+                        }
+                    },
+                    '500': {
+                        description: 'Internal Server Error',
+                        content: {
+                            'application/json': {
+                                schema: {
+                                    type: 'object',
+                                    properties: {
+                                        message: { type: 'string' }
+                                    }
+                                },
+                                example: {
+                                    message: 'Internal Server Error'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         '/auth/login': {
             post: {
                 tags: ['Auth'],
@@ -482,10 +597,10 @@ let openapi = {
                                 schema: {
                                     type: 'object',
                                     properties: {
-                                        message: { 
+                                        message: {
                                             type: 'string',
                                             example: 'Logout successful'
-                                         }
+                                        }
                                     }
                                 },
                                 example: {
@@ -501,8 +616,8 @@ let openapi = {
                                 schema: {
                                     type: 'object',
                                     properties: {
-                                        message: { 
-                                            type: 'string' ,
+                                        message: {
+                                            type: 'string',
                                             example: 'Error during logout'
                                         }
                                     }
