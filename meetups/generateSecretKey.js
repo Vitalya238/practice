@@ -8,4 +8,4 @@ const jwtSecret = generateRandomString(32);
 
 console.log(`${jwtSecret}`);
 
-module.exports = jwtSecret;
+// module.exports = jwtSecret;
