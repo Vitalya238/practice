@@ -55,7 +55,7 @@ class meetupController {
         }
     }
 
-    async getOneMeetup(req, res) {
+    async findMeetupById(req, res) {
         try {
             const meetup = await Meetup.findOne({
                 where: {
@@ -76,16 +76,7 @@ class meetupController {
 
     async createMeetup(req, res) {
         try {
-            const meetupExist = await Meetup.findOne({
-                where: {
-                    meetup_id: req.body.id,
-                    title: req.body.title
-                }
-            });
-            if (meetupExist)
-                return res.status(409).send('[ERROR] 409: Meetup with such name already exists.');
             const meetup = await Meetup.create({
-                meetup_id: req.body.id,
                 title: req.body.title,
                 description: req.body.description,
                 tags: req.body.tags,

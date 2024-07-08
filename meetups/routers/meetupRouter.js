@@ -6,7 +6,7 @@ const validateRequest = require('../middleware/validateRequest');
 const checkOrganizer = require('../middleware/checkOrganizer');
 
 router.get('/', meetupController.getAllMeetup);
-router.get('/:id', meetupController.getOneMeetup);
+router.get('/:id', meetupController.findMeetupById);
 router.post('/', validateRequest(createMeetupSchema), checkOrganizer, meetupController.createMeetup);
 router.put('/:id', validateRequest(updateMeetupSchema), checkOrganizer, meetupController.updateMeetup);
 router.delete('/:id', checkOrganizer, meetupController.deleteMeetup);

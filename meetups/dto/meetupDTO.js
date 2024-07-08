@@ -1,7 +1,6 @@
 const Joi = require('joi');
 
 const createMeetupSchema = Joi.object({
-  id: Joi.number().integer().required(),
   title: Joi.string().min(3).max(100).required(),
   description: Joi.string().max(500).required(),
   tags: Joi.array().items(Joi.string()),
