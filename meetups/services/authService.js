@@ -73,6 +73,22 @@ class AuthService {
   async logout(token) {
     tokenBlacklist.push(token);
   }
+  async refreshToken(refreshToken) {
+    try {
+      const decoded = jwt.verify(refreshToken, refreshTokenSecret);
+      const user = await UserRepository.findUserById(decoded.sub);
+
+      if (!user || user.refresh_token !== refreshToken) {
+        throw new Error('Invalid refresh token');
+      }
+
+      const newAccessToken = jwt.sign({ sub: user.id }, jwtSecret, { expiresIn: '1h' });
+
+      return newAccessToken;
+    } catch (error) {
+      throw new Error('Invalid refresh token');
+    }
+  }
 
 }
 

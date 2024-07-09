@@ -53,6 +53,26 @@ class AuthController {
       next(error);
     }
   }
+  async refreshToken(req, res, next) {
+    const { refresh_token } = req.body;
+
+    if (!refresh_token) {
+      return res.status(400).json({ message: 'Refresh token is required' });
+    }
+
+    try {
+      const newAccessToken = await AuthService.refreshToken(refresh_token);
+
+      res.cookie('access-token', newAccessToken, {
+        maxAge: 3600000
+      });
+
+      res.status(200).json({ accessToken: newAccessToken });
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      res.status(401).json({ message: 'Invalid refresh token' });
+    }
+  }
 
 }
 
