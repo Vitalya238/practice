@@ -1,201 +1,89 @@
-const Meetup = require('../models/meetupModel');
-const UserMeetup = require('../models/userMeetupsModel');
+const MeetupService = require('../services/meetupService');
 const jwt = require('jsonwebtoken');
-const { Op } = require('sequelize');
 const jwtSecret = process.env.JWT_SECRET;
 
-class meetupController {
-
-    async getAllMeetup(req, res) {
-        try {
-            const { search, sort, order, page = 1, limit = 3, startDate, endDate } = req.query;
-
-            let where = {};
-            if (search) {
-                where.title = { [Op.like]: `%${search}%` };
-            }
-
-            if (startDate && endDate) {
-                where.event_time = {
-                    [Op.between]: [new Date(startDate), new Date(endDate)]
-                };
-            } else if (startDate) {
-                where.event_time = {
-                    [Op.gte]: new Date(startDate)
-                };
-            } else if (endDate) {
-                where.event_time = {
-                    [Op.lte]: new Date(endDate)
-                };
-            }
-
-            let orderOption = [];
-            if (sort) {
-                orderOption = [[sort, order || 'ASC']];
-            }
-
-            const offset = (page - 1) * limit;
-
-            const { count, rows } = await Meetup.findAndCountAll({
-                where,
-                order: orderOption,
-                limit: parseInt(limit),
-                offset
-            });
-
-            res.json({
-                totalItems: count,
-                totalPages: Math.ceil(count / limit),
-                currentPage: parseInt(page),
-                data: rows
-            });
-        } catch (error) {
-            console.error('Error fetching meetups:', error);
-            res.status(500).json({ error: 'Error' });
-        }
+class MeetupController {
+  async getAllMeetup(req, res) {
+    try {
+      const result = await MeetupService.getAllMeetups(req.query);
+      res.json({
+        totalItems: result.count,
+        totalPages: Math.ceil(result.count / req.query.limit),
+        currentPage: parseInt(req.query.page) || 1,
+        data: result.rows
+      });
+    } catch (error) {
+      console.error('Error fetching meetups:', error);
+      res.status(500).json({ error: 'Error' });
     }
+  }
 
-    async findMeetupById(req, res) {
-        try {
-            const meetup = await Meetup.findOne({
-                where: {
-                    meetup_id: req.params.id
-                },
-            });
-            if (meetup) {
-                return res.status(200).end(JSON.stringify(meetup, null, 4));
-            } else {
-                return res.status(404).send('[ERROR] 404: Meetup not found.');
-            }
-        } catch (err) {
-            console.log(err);
-            res.status(403).send('[ERROR]' + err);
-        }
+  async findMeetupById(req, res) {
+    try {
+      const meetup = await MeetupService.getMeetupById(req.params.id);
+      if (meetup) {
+        return res.status(200).json(meetup);
+      } else {
+        return res.status(404).send('[ERROR] 404: Meetup not found.');
+      }
+    } catch (error) {
+      console.error('Error fetching meetup:', error);
+      res.status(500).json({ error: 'Error' });
     }
+  }
 
-
-    async createMeetup(req, res) {
-        try {
-            const meetup = await Meetup.create({
-                title: req.body.title,
-                description: req.body.description,
-                tags: req.body.tags,
-                event_time: req.body.event_time,
-                location: req.body.location
-            });
-            return res.status(201).end(JSON.stringify(meetup, null, 4));
-        } catch (err) {
-            console.log(err);
-            res.status(403).send('[ERROR]' + err);
-        }
+  async createMeetup(req, res) {
+    try {
+      const meetup = await MeetupService.createMeetup(req.body);
+      return res.status(201).json(meetup);
+    } catch (error) {
+      console.error('Error creating meetup:', error);
+      res.status(500).json({ error: 'Error' });
     }
+  }
 
-
-    async updateMeetup(req, res) {
-        try {
-            const meetup = await Meetup.findOne({
-                where: { meetup_id: req.params.id }
-            });
-            console.log('Meetup found:', meetup);
-
-            const meetupWithSameTitle = await Meetup.findOne({
-                where: { title: req.body.title }
-            });
-            console.log('Meetup with same title:', meetupWithSameTitle);
-
-            if (meetupWithSameTitle && meetupWithSameTitle.meetup_id != req.params.id) {
-                return res.status(409).send('[ERROR] 409: You already have a meetup with such name.');
-            }
-
-            if (meetup) {
-                await Meetup.update(
-                    {
-                        title: req.body.title,
-                        description: req.body.description,
-                        tags: req.body.tags,
-                        event_time: req.body.event_time,
-                        location: req.body.location,
-                    },
-                    {
-                        where: { meetup_id: req.params.id }
-                    }
-                );
-
-                const meetupUpdated = await Meetup.findOne({
-                    where: { meetup_id: req.params.id }
-                });
-                console.log('Meetup updated:', meetupUpdated);
-
-                return res.status(200).end(JSON.stringify(meetupUpdated, null, 4));
-            } else {
-                return res.status(404).send('[ERROR] 404: Meetup not found.');
-            }
-        } catch (err) {
-            console.error('Error during updateMeetup:', err);
-            res.status(403).send('[ERROR]' + err);
-        }
+  async updateMeetup(req, res) {
+    try {
+      const meetup = await MeetupService.updateMeetup(req.params.id, req.body);
+      return res.status(200).json(meetup);
+    } catch (error) {
+      console.error('Error updating meetup:', error);
+      res.status(500).json({ error: 'Error' });
     }
+  }
 
-
-    async deleteMeetup(req, res) {
-        try {
-            const meetup = await Meetup.findOne({
-                where: {
-                    meetup_id: req.params.id,
-                },
-            });
-            if (meetup) {
-                await Meetup.destroy({
-                    where: {
-                        meetup_id: req.params.id,
-                    },
-                });
-                return res.status(200).end(JSON.stringify(meetup, null, 4));
-            } else res.status(404).send('[ERROR] 404: There is no meetup with such id.');
-        } catch (err) {
-            console.log(err);
-            res.status(403).send('[ERROR]');
-        }
+  async deleteMeetup(req, res) {
+    try {
+      await MeetupService.deleteMeetup(req.params.id);
+      res.status(200).json({ message: 'Meetup deleted' });
+    } catch (error) {
+      console.error('Error deleting meetup:', error);
+      res.status(500).json({ error: 'Error' });
     }
+  }
 
-    async subscribeToMeetup(req, res) {
-        try {
-            const token = req.cookies["access-token"];
-            if (!token) {
-                return res.status(401).json({ message: 'Unauthorized' });
-            }
+  async subscribeToMeetup(req, res) {
+    try {
+      const token = req.cookies["access-token"];
+      if (!token) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
 
-            let decoded;
-            try {
-                decoded = jwt.verify(token, jwtSecret);
-            } catch (err) {
-                console.error('Failed to verify token:', err);
-                return res.status(403).json({ message: 'Invalid token' });
-            }
+      let decoded;
+      try {
+        decoded = jwt.verify(token, jwtSecret);
+      } catch (error) {
+        console.error('Failed to verify token:', error);
+        return res.status(403).json({ message: 'Invalid token' });
+      }
 
-            const userMeetupExist = await UserMeetup.findOne(
-                {
-                    where: {
-                        userid: decoded.sub,
-                        meetupid: req.body.meetupid
-                    }
-                }
-            );
-            if(userMeetupExist) {
-                return res.status(409).send('[ERROR] 409: userMeetup already exists.');
-            }
-            const userMeetup = await UserMeetup.create({
-                userid: decoded.sub,
-                meetupid: req.body.meetupid
-            });
-
-            return res.status(201).end(JSON.stringify(userMeetup, null, 4));
-        } catch (err) {
-            console.log(err);
-            res.status(403).send('[ERROR]' + err);
-        }
+      const userMeetup = await MeetupService.subscribeToMeetup(decoded.sub, req.body.meetupid);
+      return res.status(201).json(userMeetup);
+    } catch (error) {
+      console.error('Error subscribing to meetup:', error);
+      res.status(500).json({ error: 'Error' });
     }
-
+  }
 }
 
-module.exports = new meetupController();
+module.exports = new MeetupController();
