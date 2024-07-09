@@ -1,4 +1,5 @@
 const MeetupRepository = require('../repositories/meetupRepository');
+const { Op } = require('sequelize');
 
 class MeetupService {
   async getAllMeetups(query) {
@@ -6,6 +7,7 @@ class MeetupService {
 
     let where = {};
     if (search) {
+      console.log('Adding search condition:', `%${search}%`);
       where.title = { [Op.like]: `%${search}%` };
     }
 
