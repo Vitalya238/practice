@@ -1,0 +1,31 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    networks:
+      - my-network
+    volumes:
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql  
+
+  app:
+    build: .
+    environment:
+      DB_DIALECT: postgres
+      DB_DATABASE: mydatabase
+      DB_USERNAME: myuser
+      DB_PASSWORD: mysecretpassword
+      DB_HOST: db  
+      DB_PORT: 5432
+    ports:
+      - "3000:3000"
+    networks:
+      - my-network
+
+networks:
+  my-network:

@@ -4,7 +4,7 @@
   "description": "1. Получение списка всех митапов; 2. Получение определённого митапа по его Id; 3. Регистрация нового митапа; 4. Изменение информации о существующем митапе; 5. Удаление митапа.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "author": "Vitalya238",
   "license": "ISC",
